@@ -122,6 +122,17 @@ combined["reporting_month"] = (
     .str.title()
 )
 
+# Remove aggregate total rows so provider-level analysis is not double-counted
+combined["org_name_clean"] = combined["org_name"].astype(str).str.strip().str.upper()
+combined["period_clean"] = combined["period"].astype(str).str.strip().str.upper()
+
+combined = combined[
+    (combined["org_name_clean"] != "TOTAL")
+    & (combined["period_clean"] != "TOTAL")
+].copy()
+
+combined = combined.drop(columns=["org_name_clean", "period_clean"])
+
 # Simple performance flag
 combined["performance_risk"] = combined["over_4hrs_rate_pct"].apply(
     lambda x: "High Pressure" if x >= 30 else ("Moderate Pressure" if x >= 15 else "Lower Pressure")
